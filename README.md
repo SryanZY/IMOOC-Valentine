@@ -8,7 +8,9 @@
 * H5-audio
 
 ##效果图
-![效果图一](https://github.com/SryanZY/IMOOC-Valentine/raw/master/WebContent/images/QixiA.png)
+![效果图一](https://github.com/SryanZY/IMOOC-Valentine/raw/master/WebContent/images/xiaoguotu1.png)
 
-![效果图二](https://github.com/SryanZY/IMOOC-Valentine/raw/master/WebContent/images/QixiB-bright.png)
+![效果图二](https://github.com/SryanZY/IMOOC-Valentine/raw/master/WebContent/images/xiaoguotu3.png)
+
+![效果图二](https://github.com/SryanZY/IMOOC-Valentine/raw/master/WebContent/images/xiaoguotu2.png)
 
