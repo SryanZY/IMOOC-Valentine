@@ -37,8 +37,3 @@
 
     HTML5的audio标签，插入音频文件，可控制循环播放
 ```
-
-### 补充
-
-
-慕课网课程地址： http://www.imooc.com/learn/453
