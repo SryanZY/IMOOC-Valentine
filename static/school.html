@@ -1,0 +1,464 @@
+<!DOCTYPE html>
+<html lang="zh-cn">
+<head>
+<meta charset="utf-8">
+<meta http-equiv="X-UA-Compatible" content="IE=edge">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>学校管理</title>
+<link rel="stylesheet" type="text/css" href="css/style.css" />
+<style type="text/css">
+    #schools th{
+        text-align: center;
+    }
+    
+    #startTime, #deadline{
+        background-color: white;
+    }
+    
+    .warn{
+        color: red;
+    }
+</style>
+
+<!-- 引入共有的css -->
+<script src="js/style.js"></script>
+
+</head>
+<body>
+    <div id="header"></div>
+    <div id="main" class="container">
+        <div class="row-fluid">
+            <div class="col-sm-offset-10 col-sm-2">
+                <button class="btn btn-block btn-success" type="button" onclick="showSchoolModal(-1);"
+                    style="margin-top: 20px; margin-bottom: 20px;">创建学校</button>
+            </div>
+        </div>
+        <div class="row-fluid">
+            <div class="span12 hidden" id="schools">
+                <table id="schools-table" class="table table-hover" style="text-align: center" data-func="listSchools">
+                    <thead>
+                        <tr>
+                            <th>序号</th>
+                            <th>学校编号<i class="sort-flag icon icon-sort icon-sort-up btn-link" data-sortkey="school_code"></i></th>
+                            <th>学校名称</th><th>最大用户数</th>
+                            <th>有效期起<i class="sort-flag icon icon-sort btn-link" data-sortkey="school_start_time"></i></th>
+                            <th>有效期止<i class="sort-flag icon icon-sort btn-link" data-sortkey="school_deadline"></i></th>
+                            <th>联系人</th>
+                            <th>系统版本</th>
+                            <th>创建时间<i class="sort-flag icon icon-sort btn-link" data-sortkey="create_time"></i></th>
+                            <th>操作</th>
+                        </tr>
+                    </thead>
+                    <tbody id="schools-tbody"></tbody>
+                </table>
+            </div>
+            <div id="warn" class="hidden">
+                <img class="nodata" src="image/nodata.png" alt="暂无数据" title="暂无数据"
+                    style="margin-left: 35%; margin-top: 50px; margin-bottom: 50px">
+            </div>
+            <div id="kkpager" class="hidden"></div>
+        </div>
+    </div>
+    
+    <!-- 创建学校对话框 -->
+    <div id="schoolModal" class="modal fade">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <button type="button" class="close" data-dismiss="modal">
+                        <span aria-hidden="true">×</span>
+                        <span class="sr-only">关闭</span>
+                    </button>
+                    <h3 class="modal-title">学校信息</h3>
+                </div>
+                <div class="modal-body">
+                    <form class="form-horizontal" id="school-form">
+                        <input type="hidden" id="schoolid" name="schoolId" value=""/>
+        
+                        <div class="form-group">
+                            <label class="control-label col-sm-3 required" for="zoneno">学校编号 : </label>
+        
+                            <div class="controls col-sm-7">
+                                <input type="text" id="zoneno" name="schoolCode" class="form-control">
+                            </div>
+                            <span id="zoneno-warn" class="col-sm-2 warn hidden"><i class="icon icon-times"></i>必填</span>
+                        </div>
+                        <div class="form-group">
+                            <label class="control-label col-sm-3 required" for="schoolname">学校名称 : </label>
+        
+                            <div class="controls col-sm-7">
+                                <input type="text" id="schoolname" name="schoolName" class="form-control" required>
+                            </div>
+                            <span id="name-warn" class="col-sm-2 warn hidden"><i class="icon icon-times"></i>必填</span>
+                        </div>
+                        <div class="form-group">
+                            <label class="control-label col-sm-3 required" for="controlVersion">考试版本 : </label>
+                            
+                            <div class="controls col-sm-7">
+                                <div class="radio">
+                                    <label class="radio-inline">
+                                      <input type="radio" name="controlVersion" id="radio1" value="VC" style="width: 15px; height: 15px;"> 可控版
+                                    </label>
+                                    <label class="radio-inline">
+                                      <input type="radio" name="controlVersion" id="radio2" value="VA" style="width: 15px; height: 15px;"> 自主版
+                                    </label>
+                                </div>
+                            </div>
+                            <span id="version-warn" class="col-sm-2 warn hidden"><i class="icon icon-times"></i>必选</span>
+                        </div>
+                        <div class="form-group">
+                            <label class="control-label col-sm-3 required" for="capacity">允许最大考生数 : </label>
+                            
+                            <div class="controls col-sm-7">
+                                <input type="number" id="capacity" name="capacity" class="form-control" required>
+                            </div>
+                            <span id="capacity-warn" class="col-sm-2 warn hidden"><i class="icon icon-times"></i>必填</span>
+                        </div>
+                        <div class="form-group">
+                            <label class="control-label col-sm-3" for="contacts">联系人 : </label>
+                            
+                            <div class="controls col-sm-7">
+                                <input type="text" id="contacts" name="contacts" class="form-control">
+                            </div>
+                        </div>
+                        <div class="form-group" id="phone-div">
+                            <label class="control-label col-sm-3" for="phone">联系人电话 : </label>
+                            
+                            <div class="controls col-sm-7">
+                                <input type="text" id="phone" name="phone" class="form-control">
+                            </div>
+                            <span id="phone-warn" class="col-sm-2 warn hidden"><i class="icon icon-times"></i>号码有误</span>
+                        </div>
+                        <div class="form-group">
+                            <label class="control-label col-sm-3 required" for="startTime">有效期起:</label>
+                            
+                            <div class="controls col-sm-7">
+                                <input id="startTime" name="startTime" type="text" class="form-control form-datetime" readonly="readonly" placeholder="yyyy-MM-dd hh:mm">
+                            </div>
+                            <span id="startTime-warn" class="col-sm-2 warn hidden"><i class="icon icon-times"></i>必填</span>
+                        </div>
+                        <div class="form-group">
+                            <label class="control-label col-sm-3 required" for="deadline">有效期止:</label>
+                            
+                            <div class="controls col-sm-7">
+                                <input id="deadline" name="deadline" type="text" class="form-control form-datetime" readonly="readonly" placeholder="yyyy-MM-dd hh:mm">
+                            </div>
+                            <span id="deadline-warn" class="col-sm-2 warn hidden"><i class="icon icon-times"></i>必填</span>
+                        </div>
+                        <div class="form-group">
+                            <label class="control-label col-sm-3" for="expiry_setting">过期设置</label>
+                            
+                            <div class="controls col-sm-7">
+                                <textarea id="expiry_setting" name="expiry_setting" rows="4" class="form-control col-sm-8" placeholder="json格式按技能设置有效期"></textarea>
+                            </div>
+                        </div>
+                    </form>
+                </div>
+                <div class="modal-footer">
+                    <button class="btn" data-dismiss="modal" aria-hidden="true">关闭</button>
+                    <button class="btn btn-primary" type="submit" onclick="javascript:saveSchool();">保存</button>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div id="footer" class="text-center"></div>
+    
+    <!-- js文件放底部 -->
+    <script src="js/common.js"></script>
+    <script src="js/sort_listener_events.js" type="text/javascript"></script>
+    <script type="text/javascript">
+        var schools;
+        
+        $(function(){
+            $('#header').load('header.html');
+            $('#footer').load('footer.html');
+            listSchools();
+        });
+        
+        template.helper('add', function(temp1, temp2){
+            return temp1 + temp2;
+        });
+        
+        template.helper('version', function(version){
+            if(version == 'VA') {
+                return '自主版';
+            } else if(version == 'VC') {
+                return '可控版';
+            }
+        });
+        
+        
+        function listSchools(n,size) {
+            var pageNo = 1;
+            if(typeof(n) != "undefined" && n != null){
+                pageNo = n;
+            }
+            var pageSize = gz.defaultPageSize;
+            if(typeof(size) != "undefined" && size != null){
+                pageSize = size;
+            }
+            var sortKey = $("table#schools-table").data("sortkey");
+            var sortType = $("table#schools-table").data("sorttype");
+            $.ajax({
+                type: 'GET',
+                url: serverUrl + 'schools',
+                data: {
+                    'pageNo' : pageNo,
+                    'pageSize': pageSize,
+                    'sortKey': sortKey,
+                    'sortType': sortType
+                },
+                async: true,
+                beforeSend: $.beforeSend,
+                success: function (data) {
+                    if (data['status'] < 400) {
+                        schools = data['data']['list'];
+                        
+                        $("#schools").removeClass('hidden');
+                        $("#kkpager").removeClass('hidden');
+                        $('#warn').addClass('hidden');
+                        $('#schools-tbody').html(template('school-template', {'schools': schools}));
+                        
+                        //分页控件
+                        var totalRecords = data['data']['count'];
+                        initPage(pageNo, totalRecords, pageSize, listSchools);
+                    }else {
+                        $('#warn').removeClass('hidden');
+                        $("#schools").addClass('hidden');
+                        $("#kkpager").addClass('hidden');
+                    }
+                },
+                error: function (XMLHttpRequest, textStatus, errorThrown) {
+                    gz.logger(textStatus);
+                    gz.logger(errorThrown);
+                }
+            });
+        }
+        
+        /*截取yyyy-mm-dd*/
+        function turnTime(timestamp) {
+            if(timestamp != ''){
+                return timestamp.split(" ")[0];
+            }else {
+                return '';
+            }
+        }
+        
+        /*获取当前时间*/
+        function getCurrentTime(){
+            var time = new Date();
+        }
+        
+        function showSchoolModal(i) {
+            // 选择时间和日期
+            $("#startTime").datetimepicker(
+            {
+                weekStart: 1,
+                todayBtn:  1,
+                autoclose: 1,
+                todayHighlight: 1,
+                startView: 2,
+                forceParse: 0,
+                showMeridian: 1,
+                format: "yyyy-mm-dd hh:ii"
+            }).on('click', function() {
+                $("#startTime").datetimepicker("setStartDate", date2String()); //设置开始时间
+                if($('#deadline').val() != '') {
+                    $("#startTime").datetimepicker("setEndDate", turnTime($('#deadline').val()));
+                }
+            });
+            
+            $("#deadline").datetimepicker(
+            {
+                weekStart: 1,
+                todayBtn:  1,
+                autoclose: 1,
+                todayHighlight: 1,
+                startView: 2,
+                forceParse: 0,
+                showMeridian: 1,
+                format: "yyyy-mm-dd hh:ii"
+            }).on('click', function() {
+                if($('#startTime').val() != '') {
+                    $("#deadline").datetimepicker("setStartDate", turnTime($('#startTime').val()));
+                }
+            });
+            
+            $('.warn').addClass('hidden'); //提示信息全部隐藏
+            $('#phone-div').removeClass('has-error');
+            
+            if (i === -1) {
+                $('#schoolid').val('');
+                $('#zoneno').val('');
+                $('#zoneno').removeProp('disabled');
+                $('#schoolname').val('');
+                $('#capacity').val('');
+                $('#contacts').val('');
+                $('#phone').val('');
+                $('#startTime').val('');
+                $('#deadline').val('');
+                $('#expiry_setting').val('');
+                $('#radio1').removeAttr("checked");
+                $('#radio2').removeAttr("checked");
+            } else {
+                $('#schoolid').val(schools[i]['schoolId']);
+                $('#zoneno').val(schools[i]['schoolCode']);
+                $('#zoneno').prop('disabled', 'disabled');
+                $('#schoolname').val(schools[i]['schoolName']);
+                if(schools[i]['controlVersion'] === 'VC'){
+                    $('#radio1').attr("checked",'checked');
+                }else if(schools[i]['controlVersion'] === 'VA'){
+                    $('#radio2').attr("checked",'checked');
+                }
+                $('#capacity').val(schools[i]['capacity']);
+                $('#contacts').val(schools[i]['contacts']);
+                $('#phone').val(schools[i]['phone']);
+                $('#startTime').val(schools[i]['startTime']);
+                $('#deadline').val(schools[i]['deadline']);
+                $('#expiry_setting').val(schools[i]['expirySetting']);
+            }
+            $('#schoolModal').modal('show');
+        }
+        
+        function init() {
+            var flag = true;
+            if($('#zoneno').val() == '') {
+                $('#zoneno-warn').removeClass('hidden');
+                flag = false;
+            }else {
+                $('#zoneno-warn').addClass('hidden');
+            }
+            
+            if($('#schoolname').val() == '') {
+                $('#name-warn').removeClass('hidden');
+                flag = false;
+            }else {
+                $('#name-warn').addClass('hidden');
+            }
+            
+            if(typeof $("input[name='controlVersion']:checked").val() == 'undefined') {
+                $('#version-warn').removeClass('hidden');
+                flag = false;
+            }else {
+                $('#version-warn').addClass('hidden');
+            }
+            
+            if($('#capacity').val() == '') {
+                $('#capacity-warn').removeClass('hidden');
+                flag = false;
+            }else {
+                $('#capacity-warn').addClass('hidden');
+            }
+            
+            if($('#startTime').val() == '') {
+                $('#startTime-warn').removeClass('hidden');
+                flag = false;
+            }else {
+                $('#startTime-warn').addClass('hidden');
+            }
+            
+            if($('#deadline').val() == '') {
+                $('#deadline-warn').removeClass('hidden');
+                flag = false;
+            }else {
+                $('#deadline-warn').addClass('hidden');
+            }
+            
+            if($('#phone').val() != '') {
+                if(!(/^1(3|4|5|7|8)\d{9}$/.test($('#phone').val()))) {
+                    $('#phone-warn').removeClass('hidden');
+                    $('#phone-div').addClass('has-error');
+                    flag = false;
+                }else {
+                    $('#phone-warn').addClass('hidden', 'hidden');
+                    $('#phone-div').removeClass('has-error');
+                }
+            }else {
+                $('#phone-warn').addClass('hidden', 'hidden');
+                $('#phone-div').removeClass('has-error');
+            }
+            
+            return flag;
+        }
+        
+        function saveSchool() {
+            if(!init()) {
+                return;
+            }
+            var pageNo;
+            if (!$('#schoolid').val()) {
+                typeParam = 'POST';
+                urlParam = serverUrl + 'schools';
+                pageNo = 1;
+            } else {
+                typeParam = 'PUT';
+                urlParam = serverUrl + 'schools';
+                pageNo = kkpager.pno; ///更新数据后刷新当前页
+            }
+            $.ajax({
+                type: typeParam,
+                url: urlParam,
+                data: JSON.stringify($('#school-form').serializeObject()),
+                dataType: "json",
+                contentType:"application/json",
+                async: true,
+                beforeSend: $.beforeSend,
+                success: function (data) {
+                    if (data['status'] < 400) {
+                        $('#schoolModal').modal('hide');
+                        listSchools(pageNo);
+                        new $.zui.Messager('保存学校成功',zuiMessager.success ).show();
+                    } else {
+                        new $.zui.Messager('保存学校失败', zuiMessager.fail).show();
+                    }
+                },
+                error: function (XMLHttpRequest, textStatus, errorThrown) {
+                    gz.logger(textStatus);
+                    gz.logger(errorThrown);
+                }
+            });
+        }
+        
+        function delSchool(schoolId, schoolCode) {
+            bootbox.confirm('确定删除该学校？', function(result){
+                if(result){
+                    $.ajax({
+                        type: 'DELETE',
+                        url: serverUrl + 'schools/' + schoolId + "?schoolCode=" + schoolCode,
+                        async: true,
+                        beforeSend: $.beforeSend,
+                        success: function (data) {
+                            if (data['status'] < 400) {
+                                listSchools();
+                            } else {
+                                new $.zui.Messager('删除学校失败', zuiMessager.success).show();
+                            }
+                        },
+                        error: function (XMLHttpRequest, textStatus, errorThrown) {
+                            gz.logger(textStatus);
+                            gz.logger(errorThrown);
+                        }
+                    });
+                }else{
+                    return;
+                }
+            });
+        }
+
+    </script>
+    
+    <script id="school-template" type="text/html">
+        {{each schools as school i}}
+            <tr>
+                <td>{{school.order}}</td><td>{{school.schoolCode}}</td><td>{{school.schoolName}}</td><td>{{school.capacity}}</td>
+                <td>{{school.startTime}}</td><td>{{school.deadline}}</td><td>{{school.contacts}}</td>
+                <td>{{version(school.controlVersion)}}</td><td>{{school.createTime}}</td>
+                <td>
+                    <a href="javascript:showSchoolModal('{{i}}');"><i class="icon-edit"></i></a>
+                    &nbsp;<a href="javascript:delSchool('{{school.schoolId}}','{{school.schoolCode}}');"><i class="icon-remove"></i></a>
+                </td>
+            </tr>
+        {{/each}}
+    </script>
+</body>
+</html>

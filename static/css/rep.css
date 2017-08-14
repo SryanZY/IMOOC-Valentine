@@ -1,0 +1,42 @@
+.wrapper_rep{width: 800px;margin: auto;padding:0 20px;}
+.logo_rep{
+    background: url(../image/fltrp_logo.jpg) no-repeat 1px 1px;
+    background-size: 150px 150px;
+    height: 150px;
+    padding-left: 150px;
+    padding-right:100px;
+    padding-top: 5px;
+    margin-bottom: 20px;
+}
+.logo_rep h1,.logo_rep h2,.logo_rep h3{
+    text-align: center;
+}
+.info_rep>.row div{
+    padding-left: 50px;
+}
+.info_rep{font-size: 15px;}
+.info_rep label{
+    width: 80px;
+    text-align: right;
+}
+.line_one{
+    margin-bottom: 20px;
+}
+.line_one>h3>span {
+    background: url(../image/diamond.png) no-repeat 1px 1px;
+    background-size: 20px 14px;
+    padding-left: 25px;
+    line-height: 20px;
+}
+.line_one table th{
+    background-color:#4F81BD !important;
+    color: white;
+    border: 1px solid #fff;
+}
+.line_one table td{
+    background-color:#D0D8E8;
+    border: 1px solid #fff;
+}
+.line_one table tr:nth-child(odd)>td{
+    background-color: #E9EDF4;
+}

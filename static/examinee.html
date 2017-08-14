@@ -1,0 +1,462 @@
+<!DOCTYPE html>
+<html lang="zh-cn">
+<head>
+<meta charset="utf-8">
+<meta http-equiv="X-UA-Compatible" content="IE=edge">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>考生管理</title>
+<!-- css文件 放头部-->
+<link rel="stylesheet" type="text/css" href="css/style.css" />
+<link href="lib/kindeditor/kindeditor.min.css" type="text/css" rel="stylesheet">
+
+<!-- 引入共有的css -->
+<script src="js/style.js"></script>
+
+</head>
+<body>
+    <div id="header"></div>
+    <div id="main">
+        <div class="container">
+            <div class="row" style="margin-top: 20px;margin-bottom: 20px;">
+              <a href="javascript:goback();" class="goback" id="backId">返回</a>
+            </div>
+            <ul class="nav nav-pills">
+              <li class="active"><a data-target="#tabContent1" data-toggle="tab" onclick="initContainer();">添加考生</a></li>
+              <li><a data-target="#tabContent2" data-toggle="tab" onclick="getExamineeList();">移出考生</a></li>
+           </ul>
+           <div class="tab-content">
+                <div class="tab-pane fade active in" id="tabContent1">
+                    <div id="user-list-body" style="padding: 8px;"></div>
+                </div>
+                <div class="tab-pane fade" id="tabContent2">
+                    <div id="examinee-list-body" style="padding: 8px;"></div>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <div id="footer" class="text-center"></div>
+    
+    <!-- js文件放底部 -->
+    <!-- 共有的js引用commos.js -->
+    <script src="js/common.js"></script>
+    <!--  各个页面单独用的js 各自引入-->
+    <script id="addExamUser-byTeacher" type="text/html">
+       <table class="table-borderless">
+          <tr>
+            <td style="width:45%;">
+              <select id="clazzListSelect" class="form-control" onchange="getRemainderExamineeList2();"><option value="">--请选择班级--</option></select>
+              <div id="select1" style="width:100%;height: 300px;overflow-y: auto;" class="form-control"></div>
+            </td>
+            <td style="width:5%;vertical-align: middle;padding: 8px;">
+              <button id="add_all" style="width:50px;">>></button><br />
+            </td>
+            <td style="width:45%;">
+              <div class="form-control">新增考生<span id="checkedCount"></span>个：
+                <button id="remove_all" class="btn btn-mini btn-primary" type="button"  style="float: right;"><i class="icon icon-trash"></i> 清空</button>
+              </div>
+              <div id="select2" style="width:100%;height: 300px;overflow-y: auto;" class="form-control">
+              </div>
+            </td>
+          </tr>
+          <tr><td colspan="3" style="text-align: right;"><button type="button" class="btn btn-primary" onclick="saveExamUser();">添加</button></td></tr>
+        </table>
+    </script>
+    <script id="select1-students-template" type="text/html">
+    {{each students as student i}}
+       <div style="display: inline-block;" class="rectangle-mini add_student1" userId="{{student.userId}}" userName="{{student.name}}">{{student.name}}<span onclick="addStudent(this);">></span></div>
+    {{/each}}
+    </script>
+    <script id="select2-students-template" type="text/html">
+       <div style="display: inline-block;" class="rectangle-mini add_student2" userId="{{student.userId}}" userName="{{student.name}}">{{student.name}}<span onclick="removeStudent(this);">X</span></div>
+    </script>
+    <script id="addExamUser-byOrg" type="text/html">
+      <div style="padding: 5px;border: 1px solid #ccc">
+         <span style="width:80px;padding-left: 20px;">添加考生</span>
+         <div style="float: right;">
+           <button class="btn btn-mini btn-primary" type="button" onclick="checkAll('userCheckBox');">全选</button>
+           <button class="btn btn-mini btn-primary" type="button" onclick="otherCheck('userCheckBox');">反选</button>
+         </div>
+      </div>
+      <div id="grade-list" style="padding: 5px;border: 1px solid #ccc"></div>
+      <div id="major-list" style="padding: 5px;border: 1px solid #ccc"></div>
+      <div id="user-list" style="padding: 5px 20px;border: 1px solid #ccc"></div>
+      <div style="padding: 5px;border: 1px solid #ccc;text-align:right;">
+         <button class="btn btn-mini btn-primary" type="button" onclick="saveExamUserByOrg('userCheckBox');">添加</button>
+      </div>
+    </script>
+    <script id="grade-list-template" type="text/html">
+        {{if data}}
+            {{each data as value i}}
+                <button style="width:80px;" class="btn btn-mini btn-link" type="button" onclick="getMajorSelectList('{{value}}');setActive(this,'grade');">
+                   {{value}}
+                </button>
+            {{/each}}
+         {{else}}
+         {{/if}}
+    </script>
+    <script id="major-list-template" type="text/html">
+         {{if data}}
+            {{each data as value i}}
+                <button style="width:80px;" class="btn btn-mini btn-link" type="button" onclick="getRemainderExamineeList1('{{value}}');setActive(this,'major')">
+                   {{value}}
+                </button>
+            {{/each}}
+         {{else}}
+         {{/if}}
+    </script>
+    <script id="user-list-template" type="text/html">
+       {{if users!=null && users.length>0}}
+            {{each users as user i}}
+              <div class="user-checked btn btn-mini btn-link"><input type="checkbox" name="userCheckBox" value="{{user.userId}}">{{user.name}}</div>
+            {{/each}}
+       {{else}}
+           <div>该专业下没有未添加的考生！</div>
+       {{/if}}
+    </script>
+    <script id="examinee-list-template" type="text/html">
+       <div style="padding: 5px 20px;border: 1px solid #ccc">
+           <span style="width:80px;">已有考生</span>
+           <div style="float: right;">
+              <button class="btn btn-mini btn-primary" type="button" onclick="checkAll('dUserCheckBox');">全选</button>
+              <button class="btn btn-mini btn-primary" type="button" onclick="otherCheck('dUserCheckBox');">反选</button>
+           </div>
+       </div>
+       <div style="padding: 5px 20px;border: 1px solid #ccc">
+       {{if users!=null && users.length>0}}
+            {{each users as user i}}
+              <div class="user-checked btn btn-mini btn-link"><input type="checkbox" name="dUserCheckBox" value="{{user.userId}}">{{user.name}}</div>
+            {{/each}}
+       {{else}}
+       {{/if}}
+       </div>
+       <div style="padding: 5px 20px;border: 1px solid #ccc;text-align: right;">
+           <button class="btn btn-mini btn-primary" type="button" onclick="deleteExamineesBatch('dUserCheckBox');">移除</button>
+       </div>
+    </script>
+    <script type="text/javascript">
+        var role = $.cookie(cookieUserRoleKey);
+        var examId = getQueryString("examId");
+        $(function() {
+            $('#header').load('header.html');
+            $('#footer').load('footer.html');
+            initContainer();
+        });
+        var checkedCount = 0;
+        var chk_value =[];
+        function initContainer() {
+            if(role == Role.Teacher.key){
+                $('#user-list-body').html(template('addExamUser-byTeacher'));
+                $('#select1').html('');
+                $('#select2').html('');
+                checkedCount = 0;
+                chk_value =[];
+                getClazzSelectList('clazzListSelect');
+                $("#checkedCount").html(checkedCount);
+            }else if(role == Role.OrgAdmin.key){
+                $('#user-list-body').html(template('addExamUser-byOrg'));
+                getRealGradeSelectList();
+            }
+        }
+        <!--获取真实年级下拉列表-->
+        function getRealGradeSelectList(){
+            $.ajax({
+                type: 'GET',
+                url: serverUrl+'users/realGrades',
+                dataType:"json",
+                async: true,
+                beforeSend: $.beforeSend,
+                success:function(data){
+                    $('#grade-list').html(template('grade-list-template',{data:data['data']}));
+                    $('#major-list').html('');
+                    $('#user-list').html('');
+                }
+            });
+        }
+        <!--获取专业下拉列表-->
+        var realGrade;
+        function getMajorSelectList(grade){
+            realGrade = grade;
+            $.ajax({
+                type: 'GET',
+                url: serverUrl+'users/majors?realGrade='+realGrade,
+                dataType:"json",
+                async: true,
+                beforeSend: $.beforeSend,
+                success:function(data){
+                    $('#major-list').html(template('major-list-template',{data:data['data']}));
+                    $('#user-list').html('');
+                }
+            });
+        }
+        <!--根据年级和专业获取学生-->
+        function getRemainderExamineeList1(major) {
+            $.ajax({
+                type: "GET",
+                data:{realGrade:realGrade,major:major},
+                url: serverUrl+'exams/'+examId+'/remainders',
+                beforeSend: $.beforeSend,
+                success: function (data) {
+                    var users = data['data'];
+                    $('#user-list').html(template('user-list-template', {users: users}));
+                },
+                error: function (XMLHttpRequest, textStatus, errorThrown) {
+                    gz.logger(textStatus);
+                    gz.logger(errorThrown);
+                }
+            });
+        }
+        <!--全选-->
+        function checkAll(checkName){
+            $("input[name="+checkName+"]").each(function() {
+                this.checked=true;
+            });
+        }
+        
+        <!--反选-->
+        function otherCheck(checkName){
+            $("input[name="+checkName+"]").each(function() {
+                if(this.checked==true){ 
+                    this.checked=false;
+                }else{
+                    this.checked=true;
+                }
+            });
+        }
+        
+        <!--获取班级下拉列表-->
+        function getClazzSelectList(selectId){
+            $.ajax({
+                type: 'GET',
+                url: serverUrl+'classes/select',
+                dataType:"json",
+                async: true,
+                beforeSend: $.beforeSend,
+                success:function(data){
+                    if (data['status'] < 400) {
+                        var selec = $("#"+selectId);
+                        selec.empty();
+                        selec.append("<option value=''>--请选择班级--</option>");
+                        $.each(data['data'],function(i,value){
+                            selec.append("<option value='"+value.id+"'>"+value.name+"</option>");
+                        });
+                    } else {
+                        new $.zui.Messager('获取班级下拉列表失败', zuiMessager.fail).show();
+                    }
+                }
+            });
+        }
+        
+        <!--获取班级下学生列表-->
+        var students;
+        function getRemainderExamineeList2(){
+            var clazzId = $('#clazzListSelect option:selected').val();
+            if(clazzId==''){
+                $('#select1').html('');
+                return;
+            }
+            $.ajax({
+                type: "GET",
+                url: serverUrl+'exams/'+examId+'/remainders/'+clazzId,
+                beforeSend: $.beforeSend,
+                success: function (data) {
+                    if (data['status'] < 400) {
+                        students = data['data'];
+                        if(students!=null && students.length>0){
+                            $('#select1').html(template('select1-students-template', {students: students}));
+                        }else{
+                            $('#select1').html('该班级下没有未添加的考生！');
+                        }
+                    } else {
+                        new $.zui.Messager('获取学生列表失败', zuiMessager.fail).show();
+                    }
+                },
+                error: function (XMLHttpRequest, textStatus, errorThrown) {
+                    gz.logger(textStatus);
+                    gz.logger(errorThrown);
+                }
+            });
+        }
+        
+        $(document).on('click','#add_all', function (){
+            $("div.add_student1").each(function(){
+                var userName = $(this).attr("userName");
+                var userId = $(this).attr("userId");
+                if (chk_value.indexOf(userId) == -1) {
+                    $(this).remove();
+                    $("#select2").append(template('select2-students-template', {student: {userId:userId,name:userName}}));
+                    $("#checkedCount").html(++checkedCount);
+                    chk_value.push(userId);
+                }
+            });
+        });
+        $(document).on('click','#remove_all', function (){
+            $("div.add_student2").each(function(){
+                var userId = $(this).attr("userId");
+                var index = chk_value.indexOf(userId);
+                if (index > -1) {
+                    chk_value.splice(index, 1);
+                    $(this).remove();
+                    $("#checkedCount").html(--checkedCount);
+                }
+            });
+        });
+        
+        function removeStudent(option){
+            var userId = $(option).parent().attr("userId");
+            var index = chk_value.indexOf(userId);
+            if (index > -1) {
+                chk_value.splice(index, 1);
+                $(option).parent().remove();
+                $("#checkedCount").html(--checkedCount);
+            }
+        }
+        
+        function addStudent(option){
+           var userName = $(option).parent().attr("userName");
+           var userId = $(option).parent().attr("userId");
+           if (chk_value.indexOf(userId) == -1) {
+                chk_value.push(userId);
+                $(option).parent().remove();
+                $("#select2").append(template('select2-students-template', {student: {userId:userId,name:userName}}));
+                $("#checkedCount").html(++checkedCount);
+           }
+        }
+        
+        function saveExamUserByOrg(checkName){
+            var chk_value =[]; 
+            $('input[name='+checkName+']:checked').each(function(){ 
+                chk_value.push($(this).val()); 
+            });
+            if (chk_value.length==0) {
+                new $.zui.Messager('您还没有选择任何学生！', zuiMessager.fail).show();
+                return;
+            }
+            $.ajax({
+                type: 'POST',
+                url: serverUrl+'exams/'+examId+'/students',
+                data: {userIds:JSON.stringify(chk_value)},
+                async: true,
+                beforeSend: $.beforeSend,
+                success: function (data) {
+                    if (data['status'] < 400) {
+                        new $.zui.Messager('添加考生成功',zuiMessager.success ).show();
+                        initContainer();
+                    } else {
+                        new $.zui.Messager('添加考生失败', zuiMessager.fail).show();
+                    }
+                },
+                error: function (XMLHttpRequest, textStatus, errorThrown) {
+                    gz.logger(textStatus);
+                    gz.logger(errorThrown);
+                }
+            });
+        }
+        function saveExamUser(){
+            if (chk_value.length==0) {
+                new $.zui.Messager('您还没有选择任何学生！', zuiMessager.fail).show();
+                return;
+            }
+            $.ajax({
+                type: 'POST',
+                url: serverUrl+'exams/'+examId+'/students',
+                data: {userIds:JSON.stringify(chk_value)},
+                async: true,
+                beforeSend: $.beforeSend,
+                success: function (data) {
+                    if (data['status'] < 400) {
+                        new $.zui.Messager('添加考生成功',zuiMessager.success ).show();
+                        initContainer();
+                    } else {
+                        new $.zui.Messager('添加考生失败', zuiMessager.fail).show();
+                    }
+                },
+                error: function (XMLHttpRequest, textStatus, errorThrown) {
+                    gz.logger(textStatus);
+                    gz.logger(errorThrown);
+                }
+            });
+        }
+        
+        function getExamineeList(){
+            $.ajax({
+                type: "GET",
+                url: serverUrl+'exams/'+examId+'/students',
+                beforeSend: $.beforeSend,
+                success: function (data) {
+                    var examinees = data['data'];
+                    if(examinees!=null && examinees.length>0){
+                        $('#examinee-list-body').html(template('examinee-list-template', {users: examinees}));
+                    }else{
+                        $('#examinee-list-body').html('暂无考生！');
+                    }
+                },
+                error: function (XMLHttpRequest, textStatus, errorThrown) {
+                    gz.logger(textStatus);
+                    gz.logger(errorThrown);
+                }
+            });
+        }
+        
+        function goback(){
+            location.href = 'exam.html';
+        }
+        
+        function setActive(obj,flag){
+            if(flag=='grade'){
+                $('#grade-list .btn').css({ color: "", background: "" });
+            }else{
+                $('#major-list .btn').css({ color: "", background: "" });
+            }
+            $(obj).css({ color: "#fff", background: "#4caf50" });
+        }
+        
+        function getQueryString(name){
+           var reg = new RegExp("(^|&)"+ name +"=([^&]*)(&|$)");
+           var r = window.location.search.substr(1).match(reg);
+           if(r!=null)return unescape(r[2]); return null;
+        }
+        
+        function deleteExamineesBatch(checkName){
+            var chk_value =[]; 
+            $('input[name='+checkName+']:checked').each(function(){ 
+                chk_value.push($(this).val()); 
+            });
+            if (chk_value.length==0) {
+                new $.zui.Messager('您还没有选择任何学生！', zuiMessager.fail).show();
+                return;
+            }
+            if("undefined" == typeof examId || examId==''){
+                new $.zui.Messager('未选中考试', zuiMessager.fail).show();
+                return;
+            }
+            bootbox.confirm('确认移出这些学生吗？', function(result){
+                if(result){
+                    $.ajax({
+                        type: 'DELETE',
+                        url: serverUrl+'exams/'+examId+'/students?userIds='+JSON.stringify(chk_value),
+                        dataType: "json",
+                        contentType:"application/json",
+                        async: true,
+                        beforeSend: $.beforeSend,
+                        success: function (data) {
+                            if (data['status'] < 400) {
+                                new $.zui.Messager('移出学生成功', zuiMessager.success).show();
+                                getExamineeList();
+                            } else {
+                                new $.zui.Messager('移出学生失败', zuiMessager.fail).show();
+                            }
+                        },
+                        error: function (XMLHttpRequest, textStatus, errorThrown) {
+                            gz.logger(textStatus);
+                            gz.logger(errorThrown);
+                        }
+                    });
+                }else{
+                    return;
+                }
+            });
+        }
+    </script>
+</body>
+</html>

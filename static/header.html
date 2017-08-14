@@ -1,0 +1,456 @@
+<div class="navbar navbar-default navbar-fixed-top">
+    <div class="container">
+        <div class="row">
+            <div class="navbar-header">
+                <button type="button" class="navbar-toggle collapsed" data-toggle="collapse"
+                        data-target="#navbar-collapse" aria-expanded="false">
+                    <span class="sr-only">Toggle navigation</span>
+                    <span class="icon-bar"></span>
+                    <span class="icon-bar"></span>
+                    <span class="icon-bar"></span>
+                </button>
+                <a class="navbar-brand" href="#"><span class="text-primary"><b id="title"></b></span></a>
+            </div>
+            <div class="navbar-collapse collapse navbar-right hide" style="height: auto;">
+                <!-- Main navigation -->
+                <ul class="nav navbar-nav">
+                    <li class="orgNav" id="user"><a href="user.html">用户管理</a></li>
+                    <li class="teacherNav" id="class"><a href="clazz.html">班级管理</a></li>
+                    <li class="teacherNav orgNav" id="exam"><a href="exam.html">考试管理</a></li>
+                    <li class="teacherNav orgNav" id="report"><a href="report-list.html">报告管理</a></li>
+                    <li class="teacherNav" id="study"><a href="study.html">教学互动</a></li>
+                    <li class="studentNav"><a href="user-examlist.html">我的考试</a></li>
+                    <li class="studentNav"><a href="user-report-list.html">我的报告</a></li>
+                    <li class="studentNav"><a href="user-study.html">我的学习</a></li>
+                    <li class="studentNav"><a href="questionnaire-paper-preview.html?paperId=87a92dfd-a5e9-4822-abff-69ace6e65d4b">问卷调查</a></li>
+                    <li class="teacherNav orgNav"><a href="personal.html">个人中心</a></li>
+                    <li class="studentNav dropdown">
+                      <a class="dropdown-toggle" data-toggle="dropdown">个人中心 <b class="caret"></b></a>
+                      <ul class="dropdown-menu" role="menu">
+                        <li><a href="personal.html">个人资料</a></li>
+                        <li><a href="javascript:showJoinTheClassModal();">加入班级</a></li>
+                      </ul>
+                    </li>
+                    <li class="adminNav"><a href="school.html">学校管理</a></li>
+                    <li class="adminNav"><a href="paper.html">试卷管理</a></li>
+                    <li class="adminNav"><a href="questionnaire-paper-list.html">问卷管理</a></li>
+                    <li class="adminNav"><a href="feedback-preview.html">反馈查看</a></li>
+                    <li class="adminNav"><a href="message-admin.html">消息中心</a></li>
+                    <li class="adminNav orgNav"><a href="data-export.html">数据导出</a></li>
+                    <li id="feedback"><a href="feedback-insert.html">意见反馈</a></li>
+                    <li id="loginBtn"><a href="user-login.html">登录</a></li>
+                    <li id="exitBtn"><a href="javascript:quit()">退出</a></li>
+                </ul>
+            </div>
+        </div>
+    </div>
+</div>
+<<<<<<< HEAD
+<!-- 加入班级对话框HTML -->
+<div class="modal fade" id="joinTheClassModal">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <button type="button" class="close" data-dismiss="modal">
+                    <span aria-hidden="true">×</span><span class="sr-only">关闭</span>
+                </button>
+                <h2 class="modal-title" style="text-align: center;">加入班级</h2>
+            </div>
+            <div class="modal-body" style="min-height: 300px;">
+                <div id="join-class-search">
+                    <div class="input-group">
+                        <span class="input-group-addon"><i class="icon icon-search"></i></span>
+                        <input type="text" class="form-control" placeholder="请输入授权码进行搜索" id="join-class-code"> 
+                        <span class="input-group-btn">
+                           <button class="btn btn-primary" type="button" onclick="getClazzByCode();">搜索</button>
+                        </span>
+                   </div>
+                </div>
+                <div id="join-class-body" style="margin-top: 20px;display: none;">
+                   <input type="hidden" id="join-class-id" value="">
+                   <div class="col-sm-9" style="border: 1px solid #ccc;background: #f7f7f7;">
+                       <div style="height: 100px;">
+                            <div style="padding: 25px 20px;font-size: 30px;"><span id="class-name-span"></span></div>
+                       </div>
+                       <div style="height: 100px;border-top: 1px solid #ccc;">
+                            <div style="padding: 18px 20px;font-size: 16px;">
+                               <div style="width: 180px;float: left;">年级：<span id="grade-span"></span></div>
+                               <div style="width: 180px;float: right;">班级教师：<span id="teacher-span"></span></div>
+                            </div>
+                            <div style="padding: 18px 20px;font-size: 16px;">
+                               <div style="width: 180px;float: left;">开始日期：<span id="begin-date-span"></span></div>
+                               <div style="width: 180px;float: right;">结束日期：<span id="end-date-span"></span></div>
+                            </div>
+                       </div>
+                   </div>
+                   <div class="col-sm-3" style="text-align: center;line-height:202px;height: 202px;border: 1px solid #ccc;">
+                       <button id="join-class-btn" type="button" class="btn btn-primary btn-lg" onclick="joinTheClass();">加入班级</button>
+                   </div>
+                </div>
+            </div>
+            <div class="modal-footer" style="text-align: center;">
+                <button type="button" class="btn btn-default" data-dismiss="modal">关闭</button>
+            </div>
+        </div>
+    </div>
+</div>
+<script>
+$(function(){
+    $('#title').html(gz.global.title);
+    //TODO 判断用户角色 显示nav菜单
+    var role = $.cookie(cookieUserRoleKey);
+    if(role === Role.Student.key){
+        $('.adminNav').empty();
+        $('.teacherNav').empty();
+        $('.orgNav').empty();
+        $('#loginBtn').empty();
+        $('.studentNav').show();
+    }else if(role === Role.Teacher.key){
+        $('.adminNav').empty();
+        $('.studentNav').empty();
+        $('#loginBtn').empty();
+        $('.orgNav').hide();
+        $('#user').empty();
+        $('.teacherNav').show();
+    }else if(role === Role.OrgAdmin.key){
+        $('.adminNav').hide();
+        $('.teacherNav').hide();
+        $('#class').empty();
+        $('#study').empty();
+        $('.studentNav').empty();
+        $('#loginBtn').empty();
+        $('.orgNav').show();
+    }else if(role === Role.Admin.key){
+        $('.teacherNav').empty();
+        $('.studentNav').empty();
+        $('.orgNav').hide();
+        $('#feedback').empty();
+        $('#loginBtn').empty();
+        $('.adminNav').show();
+    }else{
+        $('.adminNav').empty();
+        $('.teacherNav').empty();
+        $('.studentNav').empty();
+        $('.orgNav').empty();
+        $('#feedback').empty();
+        $('#exitBtn').empty();
+    }
+
+});
+
+function quit(){
+    $.ajax({
+        type: "GET",
+        url: serverUrl +'logout',
+        beforeSend: $.beforeSend,
+        success: function (data) {
+            $.cookie(cookieUserIdKey, null);
+            $.cookie(cookieUserRoleKey, null);
+            $.cookie(cookieSchoolIdKey, null);
+            $.cookie(cookieTokenKey, null);
+            return location.href = 'user-login.html';
+        },
+        error: function (XMLHttpRequest, textStatus, errorThrown) {
+            window.console.log(textStatus);
+            window.console.log(errorThrown);
+        }
+    });
+}
+function showJoinTheClassModal(){
+    $("#joinTheClassModal").modal('show');
+    $("#join-class-body").hide();
+    $("#join-class-code").val('');
+}
+function getClazzByCode() {
+    if (!$.trim($('#join-class-code').val())) {
+        new $.zui.Messager('请输入授权码进行搜索!', zuiMessager.fail).show();
+        $('#join-class-code').focus();
+        return;
+    }
+    $.ajax({
+        type: "GET",
+        url: serverUrl+'classes/codes/'+$.trim($("#join-class-code").val()),
+        beforeSend: $.beforeSend,
+        success: function (data) {
+            if (data['status'] < 400) {
+                $("#join-class-body").show();
+                var clazz = data['data']['clazz'];
+                var isJoin = data['data']['isJoin'];
+                $("#join-class-id").val(clazz['clazzId']);
+                $("#class-name-span").html(clazz['clazzName']+clazz['grade']);
+                $("#grade-span").html(clazz['grade']);
+                $("#teacher-span").html(clazz['teacherName']);
+                $("#begin-date-span").html(clazz['startTime']);
+                $("#end-date-span").html(clazz['endTime']);
+                if(isJoin==1){
+                    $("#join-class-btn").text("已经加入");
+                    $("#join-class-btn").addClass("disabled");
+                }else{
+                    $("#join-class-btn").text("加入班级");
+                    $("#join-class-btn").removeClass("disabled");
+                }
+            } else {
+                $("#join-class-body").hide();
+                new $.zui.Messager('授权码错误!', zuiMessager.fail).show();
+            }
+        },
+        error: function (XMLHttpRequest, textStatus, errorThrown) {
+            gz.logger(textStatus);
+            gz.logger(errorThrown);
+        }
+    });
+}
+function joinTheClass(){
+    var classId = $("#join-class-id").val();
+    var userId = $.cookie(cookieUserIdKey);
+    $.ajax({
+        type: "POST",
+        url: serverUrl+'classes/'+classId+"/students/"+userId,
+        contentType:"application/json",
+        dataType: 'json',
+        beforeSend: $.beforeSend,
+        success: function (data) {
+            if (data['status'] < 400) {
+                $('#joinTheClassModal').modal('hide');
+                new $.zui.Messager('加入班级成功',zuiMessager.success ).show();
+                window.location.reload();
+            } else {
+                new $.zui.Messager('加入班级失败',zuiMessager.fail ).show();
+            }
+        },
+        error: function (XMLHttpRequest, textStatus, errorThrown) {
+            gz.logger(textStatus);
+            gz.logger(errorThrown);
+        }
+    });
+}
+=======
+<div class="navbar navbar-default navbar-fixed-top">
+    <div class="container">
+        <div class="row">
+            <div class="navbar-header">
+                <button type="button" class="navbar-toggle collapsed" data-toggle="collapse"
+                        data-target="#navbar-collapse" aria-expanded="false">
+                    <span class="sr-only">Toggle navigation</span>
+                    <span class="icon-bar"></span>
+                    <span class="icon-bar"></span>
+                    <span class="icon-bar"></span>
+                </button>
+                <a class="navbar-brand" href="#"><span class="text-primary"><b id="title"></b></span></a>
+            </div>
+            <div class="navbar-collapse collapse navbar-right hide" style="height: auto;">
+                <!-- Main navigation -->
+                <ul class="nav navbar-nav">
+                    <li class="orgNav" id="user"><a href="user.html">用户管理</a></li>
+                    <li class="teacherNav" id="class"><a href="clazz.html">班级管理</a></li>
+                    <li class="teacherNav orgNav" id="exam"><a href="exam.html">考试管理</a></li>
+                    <li class="teacherNav orgNav" id="report"><a href="report.html">报告管理</a></li>
+                    <li class="teacherNav" id="study"><a href="study.html">教学互动</a></li>
+                    <li class="studentNav"><a href="user-examlist.html">我的考试</a></li>
+                    <li class="studentNav"><a href="user-report.html">我的报告</a></li>
+                    <li class="studentNav"><a href="user-study.html">我的学习</a></li>
+                    <li class="studentNav"><a href="questionnaire-paper-preview.html?paperId=87a92dfd-a5e9-4822-abff-69ace6e65d4b">问卷调查</a></li>
+                    <li class="teacherNav orgNav"><a href="personal.html">个人中心</a></li>
+                    <li class="studentNav dropdown">
+                      <a class="dropdown-toggle" data-toggle="dropdown">个人中心 <b class="caret"></b></a>
+                      <ul class="dropdown-menu" role="menu">
+                        <li><a href="personal.html">个人资料</a></li>
+                        <li><a href="javascript:showJoinTheClassModal();">加入班级</a></li>
+                      </ul>
+                    </li>
+                    <li class="adminNav"><a href="school.html">学校管理</a></li>
+                    <li class="adminNav"><a href="paper.html">试卷管理</a></li>
+                    <li class="adminNav"><a href="questionnaire-paper-list.html">问卷管理</a></li>
+                    <li class="adminNav"><a href="feedback-preview.html">反馈查看</a></li>
+                    <li class="adminNav"><a href="message-admin.html">消息中心</a></li>
+                    <li class="adminNav orgNav"><a href="data-export.html">数据导出</a></li>
+                    <li id="feedback"><a href="feedback-insert.html">意见反馈</a></li>
+                    <li id="loginBtn"><a href="user-login.html">登录</a></li>
+                    <li id="exitBtn"><a href="javascript:quit()">退出</a></li>
+                </ul>
+            </div>
+        </div>
+    </div>
+</div>
+=======
+>>>>>>> 4f8823cce32b533fb34292e45c1d7ee6f515be8f
+<!-- 加入班级对话框HTML -->
+<div class="modal fade" id="joinTheClassModal">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <button type="button" class="close" data-dismiss="modal">
+                    <span aria-hidden="true">×</span><span class="sr-only">关闭</span>
+                </button>
+                <h2 class="modal-title" style="text-align: center;">加入班级</h2>
+            </div>
+            <div class="modal-body" style="min-height: 300px;">
+                <div id="join-class-search">
+                    <div class="input-group">
+                        <span class="input-group-addon"><i class="icon icon-search"></i></span>
+                        <input type="text" class="form-control" placeholder="请输入授权码进行搜索" id="join-class-code"> 
+                        <span class="input-group-btn">
+                           <button class="btn btn-primary" type="button" onclick="getClazzByCode();">搜索</button>
+                        </span>
+                   </div>
+                </div>
+                <div id="join-class-body" style="margin-top: 20px;display: none;">
+                   <input type="hidden" id="join-class-id" value="">
+                   <div class="col-sm-9" style="border: 1px solid #ccc;background: #f7f7f7;">
+                       <div style="height: 100px;">
+                            <div style="padding: 25px 20px;font-size: 30px;"><span id="class-name-span"></span></div>
+                       </div>
+                       <div style="height: 100px;border-top: 1px solid #ccc;">
+                            <div style="padding: 18px 20px;font-size: 16px;">
+                               <div style="width: 180px;float: left;">年级：<span id="grade-span"></span></div>
+                               <div style="width: 180px;float: right;">班级教师：<span id="teacher-span"></span></div>
+                            </div>
+                            <div style="padding: 18px 20px;font-size: 16px;">
+                               <div style="width: 180px;float: left;">开始日期：<span id="begin-date-span"></span></div>
+                               <div style="width: 180px;float: right;">结束日期：<span id="end-date-span"></span></div>
+                            </div>
+                       </div>
+                   </div>
+                   <div class="col-sm-3" style="text-align: center;line-height:202px;height: 202px;border: 1px solid #ccc;">
+                       <button id="join-class-btn" type="button" class="btn btn-primary btn-lg" onclick="joinTheClass();">加入班级</button>
+                   </div>
+                </div>
+            </div>
+            <div class="modal-footer" style="text-align: center;">
+                <button type="button" class="btn btn-default" data-dismiss="modal">关闭</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+$(function(){
+    $('#title').html(gz.global.title);
+    //TODO 判断用户角色 显示nav菜单
+    var role = $.cookie(cookieUserRoleKey);
+    if(role === Role.Student.key){
+        $('.adminNav').empty();
+        $('.teacherNav').empty();
+        $('.orgNav').empty();
+        $('#loginBtn').empty();
+        $('.studentNav').show();
+    }else if(role === Role.Teacher.key){
+        $('.adminNav').empty();
+        $('.studentNav').empty();
+        $('#loginBtn').empty();
+        $('.orgNav').hide();
+        $('#user').empty();
+        $('.teacherNav').show();
+    }else if(role === Role.OrgAdmin.key){
+        $('.adminNav').hide();
+        $('.teacherNav').hide();
+        $('#class').empty();
+        $('#study').empty();
+        $('.studentNav').empty();
+        $('#loginBtn').empty();
+        $('.orgNav').show();
+    }else if(role === Role.Admin.key){
+        $('.teacherNav').empty();
+        $('.studentNav').empty();
+        $('.orgNav').hide();
+        $('#feedback').empty();
+        $('#loginBtn').empty();
+        $('.adminNav').show();
+    }else{
+        $('.adminNav').empty();
+        $('.teacherNav').empty();
+        $('.studentNav').empty();
+        $('.orgNav').empty();
+        $('#feedback').empty();
+        $('#exitBtn').empty();
+    }
+
+});
+
+function quit(){
+    $.ajax({
+        type: "GET",
+        url: serverUrl +'logout',
+        beforeSend: $.beforeSend,
+        success: function (data) {
+            $.cookie(cookieUserIdKey, null);
+            $.cookie(cookieUserRoleKey, null);
+            $.cookie(cookieSchoolIdKey, null);
+            $.cookie(cookieTokenKey, null);
+            return location.href = 'user-login.html';
+        },
+        error: function (XMLHttpRequest, textStatus, errorThrown) {
+            window.console.log(textStatus);
+            window.console.log(errorThrown);
+        }
+    });
+}
+function showJoinTheClassModal(){
+    $("#joinTheClassModal").modal('show');
+    $("#join-class-body").hide();
+    $("#join-class-code").val('');
+}
+function getClazzByCode() {
+    if (!$.trim($('#join-class-code').val())) {
+        new $.zui.Messager('请输入授权码进行搜索!', zuiMessager.fail).show();
+        $('#join-class-code').focus();
+        return;
+    }
+    $.ajax({
+        type: "GET",
+        url: serverUrl+'classes/codes/'+$.trim($("#join-class-code").val()),
+        beforeSend: $.beforeSend,
+        success: function (data) {
+            if (data['status'] < 400) {
+                $("#join-class-body").show();
+                var clazz = data['data']['clazz'];
+                var isJoin = data['data']['isJoin'];
+                $("#join-class-id").val(clazz['clazzId']);
+                $("#class-name-span").html(clazz['clazzName']+clazz['grade']);
+                $("#grade-span").html(clazz['grade']);
+                $("#teacher-span").html(clazz['teacherName']);
+                $("#begin-date-span").html(clazz['startTime']);
+                $("#end-date-span").html(clazz['endTime']);
+                if(isJoin==1){
+                    $("#join-class-btn").text("已经加入");
+                    $("#join-class-btn").addClass("disabled");
+                }else{
+                    $("#join-class-btn").text("加入班级");
+                    $("#join-class-btn").removeClass("disabled");
+                }
+            } else {
+                $("#join-class-body").hide();
+                new $.zui.Messager('授权码错误!', zuiMessager.fail).show();
+            }
+        },
+        error: function (XMLHttpRequest, textStatus, errorThrown) {
+            gz.logger(textStatus);
+            gz.logger(errorThrown);
+        }
+    });
+}
+function joinTheClass(){
+    var classId = $("#join-class-id").val();
+    var userId = $.cookie(cookieUserIdKey);
+    $.ajax({
+        type: "POST",
+        url: serverUrl+'classes/'+classId+"/students/"+userId,
+        contentType:"application/json",
+        dataType: 'json',
+        beforeSend: $.beforeSend,
+        success: function (data) {
+            if (data['status'] < 400) {
+                $('#joinTheClassModal').modal('hide');
+                new $.zui.Messager('加入班级成功',zuiMessager.success ).show();
+                window.location.reload();
+            } else {
+                new $.zui.Messager('加入班级失败',zuiMessager.fail ).show();
+            }
+        },
+        error: function (XMLHttpRequest, textStatus, errorThrown) {
+            gz.logger(textStatus);
+            gz.logger(errorThrown);
+        }
+    });
+}
+</script>

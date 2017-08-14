@@ -1,0 +1,434 @@
+<!DOCTYPE html>
+<html lang="zh-cn">
+<head>
+<meta charset="utf-8">
+<meta http-equiv="X-UA-Compatible" content="IE=edge">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>完善您的信息</title>
+<!-- css文件 放头部-->
+<link rel="stylesheet" type="text/css" href="css/style.css" />
+
+<!-- 引入共有的css -->
+<script src="js/style.js"></script>
+<style>
+    #first-login-content{
+        width: 50%;
+        margin-left: 30%;
+    }
+    
+    #personal-info-title{
+        margin-left: 25%;
+        margin-bottom: 25px;
+        font-size: 18px;
+        font-weight: bold;
+    }
+    
+    #personal-info-body{
+        margin-top: 20px;
+    }
+    
+    #personal-info-body .form-group{
+        margin-top: 20px;
+    }
+    .remind{
+        color: red;
+    }
+    
+    .icon-asterisk{
+        font-size: 8px;
+        margin-left: 5px;
+        color: red;
+    }
+    
+    .item-title{
+        padding-left: 43px;
+        margin-top: 5px;
+    }
+</style>
+</head>
+<body>
+    <div id="main">
+        <div id="first-login-content"></div>
+    </div>
+     <!-- js文件放底部 -->
+    <!-- 共有的js引用commos.js -->
+    <script src="js/common.js"></script>
+    <!--  各个页面单独用的js 各自引入-->
+    <script type="text/javascript">
+        var userId = $.cookie(cookieUserIdKey);
+        var user;
+        
+        $(function(){
+            getPersonalInfo();
+        });
+        
+        function init(){
+            //初始化民族下拉列表
+            var nations = ["汉族","蒙古族","回族","藏族","维吾尔族","苗族","彝族","壮族","布依族","朝鲜族","满族","侗族","瑶族","白族","土家族",
+                           "哈尼族","哈萨克族","傣族","黎族","傈僳族","佤族","畲族","高山族","拉祜族","水族","东乡族","纳西族","景颇族","柯尔克孜族",
+                           "土族","达斡尔族","仫佬族","羌族","布朗族","撒拉族","毛南族","仡佬族","锡伯族","阿昌族","普米族","塔吉克族","怒族", "乌孜别克族",
+                            "俄罗斯族","鄂温克族","德昂族","保安族","裕固族","京族","塔塔尔族","独龙族","鄂伦春族","赫哲族","门巴族","珞巴族","基诺族"];
+            
+            var $nat = document.getElementById ("national");
+            for ( var i = 0; i < nations.length; i++) {
+                var option = document.createElement ('option');
+                option.value = nations[i];
+                var txt = document.createTextNode (nations[i]);
+                option.appendChild (txt);
+                $nat.appendChild (option);
+            }
+            
+          //初始化性别
+            if(user.sex === 1) {
+                $("#sex-w").attr("checked", true);
+            }else if(user.sex === 2){
+                $("#sex-m").attr("checked", true);
+            }
+            
+            //初始化民族
+            $("#national option").each(function(i) {
+                if($(this).text() === user.nation) {
+                    $(this).attr("selected",true);
+                }
+            });
+        } 
+        
+        function getPersonalInfo() {
+            $.ajax({
+                type: 'GET',
+                url: serverUrl + 'users/' + userId,
+                async: true,
+                beforeSend: $.beforeSend,
+                success: function (data) {
+                    if (data['status'] < 400) {
+                        user = data['data'];
+                        $('#first-login-content').html(template('personal-info-template', {'user': user}));
+                        //初始化
+                        init();
+                    } else {
+                        new $.zui.Messager('获取用户信息失败', zuiMessager.fail).show();
+                    }
+                },
+                error: function (XMLHttpRequest, textStatus, errorThrown) {
+                    gz.logger(textStatus);
+                    gz.logger(errorThrown);
+                }
+            });
+        }
+        
+        function savePersonalInfo(option) {
+            var dataMap;
+            if(option == 'save-info') { // 保存用户信息
+                var enter = true;
+                
+                //性别
+                var sexChecked = false;
+                $("input[name='sex']").each(function(i) {
+                    if($(this).prop("checked")){
+                        sexChecked = true;
+                    }
+                });
+                if(!sexChecked) {
+                    $("#sexRemind").html("请选择性别！");
+                    enter = false;
+                }else {
+                    $("#sexRemind").html("");
+                }
+                
+                //民族
+                if($("#national").val() == "") {
+                    $("#nationalRemind").html("请选择民族！");
+                    enter = false;
+                }else {
+                    $("#nationalRemind").html("");
+                }
+                
+                //专业
+                if(!$.trim($("#major").val())) {
+                    $("#majorRemind").html('请填写您的专业！');
+                    enter = false;
+                }else {
+                    $("#majorRemind").html("");
+                }
+                
+                //对邮箱的验证
+                var email = $("#email").val();
+                if(email != "") {
+                    var emailReg = /^([a-zA-Z0-9]+[_|\_|\.]?)*[a-zA-Z0-9]+@([a-zA-Z0-9]+[_|\_|\.]?)*[a-zA-Z0-9]+\.[a-zA-Z]{2,3}$/;
+                    if(!emailReg.test(email)){
+                        $("#emailRemind").html('邮箱格式不正确，请重新输入！');
+                        enter = false;
+                    }else {
+                        $("#emailRemind").html('请正确填写邮箱地址，以便收到诊断报告及系统公告');
+                    }
+                }else {
+                    $("#emailRemind").html('请填写您的邮箱！');
+                    enter = false;
+                }
+                
+                //对身份证的验证
+                var identityCard = $("#identityCard").val();
+                if(identityCard != "") {
+                    var identityReg=/^[1-9]{1}[0-9]{14}$|^[1-9]{1}[0-9]{16}([0-9]|[xX])$/;
+                    if(!identityReg.test(identityCard)) {
+                        $("#identityRemind").html("身份证号码有误，请重填！");
+                        enter = false;
+                    }else {
+                        $("#identityRemind").html('');
+                    }
+                }
+                //对电话号码的验证
+                var phoneNumber = $("#phoneNumber").val();
+                if(phoneNumber != "") {
+                    if(!(/^1(3|4|5|7|8)\d{9}$/.test(phoneNumber))){ 
+                        $("#phoneRemind").html('手机号码有误，请重填！');
+                        enter = false;
+                    }else {
+                        $("#phoneRemind").html('');
+                    }
+                }else {
+                    $("#phoneRemind").html('请填写您的手机号码！');
+                    enter = false;
+                }
+                
+                if(!enter){
+                    return false;
+                }
+                
+                dataMap = $('#personal-info-form').serializeObject();
+            }else if(option == 'save-passwd'){ //修改密码
+                var enter = true;
+                
+                var oldPasswd = $("#old-passwd").val();
+                var newPasswd = $("#new-passwd").val();
+                var confirmPasswd = $("#confirm-passwd").val();
+                
+                if (!$.trim(oldPasswd)) {
+                    $("#oldRemind").html('请填写您的原密码');
+                    $('#old-passwd').focus();
+                    enter = false;
+                }else {
+                    if($.md5(oldPasswd) != user['password']) { //输入的原密码不正确
+                        $("#oldRemind").html('原密码不正确');
+                        $('#old-passwd').focus();
+                        enter = false;
+                    }else {
+                        $("#oldRemind").html('');
+                    }
+                }
+                
+                if (!$.trim(newPasswd)) {
+                    $("#newRemind").html('请填写您的新密码');
+                    $('#new-passwd').focus();
+                    enter = false;
+                }else {
+                    $("#newRemind").html('');
+                }
+                
+                if (!$.trim(confirmPasswd)) {
+                    $("#confirmRemind").html('请填写确认的新密码');
+                    $('#confirm-passwd').focus();
+                    enter = false;
+                }else {
+                    if(newPasswd != confirmPasswd) {
+                        $("#confirmRemind").html('两次输入的密码不一致');
+                        enter = false;
+                    } else {
+                        $("#confirmRemind").html('');
+                        dataMap = {
+                            'password': $.md5(newPasswd)
+                        }
+                    }
+                }
+                if(!enter) {
+                    return;
+                }
+            }
+            $.ajax({
+                type: 'PUT',
+                url: serverUrl + 'users/' + userId,
+                async: true,
+                data: JSON.stringify(dataMap),
+                contentType:"application/json",
+                dataType: 'json',
+                beforeSend: $.beforeSend,
+                success: function (data) {
+                    if (data['status'] < 400) {
+                        if(option == 'save-info') {
+                            new $.zui.Messager('修改成功',zuiMessager.success ).show();
+                            setTimeout(function () {
+                                $('#first-login-content').html(template('update-passwd-template'));
+                              }, 1000);
+                        }else {
+                            new $.zui.Messager('修改成功',zuiMessager.success ).show();
+                            setTimeout(function () {
+                                return location.href = 'user-examlist.html';
+                              }, 1000);
+                        }
+                    } else {
+                        new $.zui.Messager('修改失败', zuiMessager.fail).show();
+                    }
+                },
+                error: function (XMLHttpRequest, textStatus, errorThrown) {
+                    gz.logger(textStatus);
+                    gz.logger(errorThrown);
+                }
+            });
+        }
+    </script>
+    <script id="personal-info-template" type="text/html">
+        <div id="personal-info-title">
+            请完善您的个人信息
+        </div>
+        <div id="personal-info-body">
+            <form class="form-horizontal" id="personal-info-form">
+                <div class="form-group">
+                    <div class="item-title col-sm-2">
+                        <label for="name">姓名</label>
+                    </div>
+
+                    <div class="col-md-6 col-sm-10">
+                        <input type="text" class="form-control" name="name" value="{{user.name}}" disabled>
+                    </div>
+                </div>
+                <div class="form-group">
+                    <div class="item-title col-sm-2">
+                        <label for="userId">ID</label>
+                    </div>
+
+                    <div class="col-md-6 col-sm-10">
+                        <input type="text" class="form-control" name="userId" value="{{user.userId}}" disabled>
+                    </div>
+                </div>
+                <div class="form-group">
+                    <div class="item-title col-sm-2">
+                        <label for="realClass">班级</label>
+                    </div>
+
+                    <div class="col-md-6 col-sm-10">
+                        <input type="text" class="form-control" name="realClass" value="{{user.realClass}}" disabled>
+                    </div>
+                </div>
+                <div class="form-group">
+                    <div class="item-title col-sm-2">
+                        <label for="sex" class="">性别<i class="icon-asterisk"/></label>
+                    </div>
+
+                    <div class="col-md-6 col-sm-10">
+                        <label class="radio-inline">
+                            <input type="radio" name="sex" id="sex-m" value="2">男
+                        </label>
+                        <label class="radio-inline">
+                            <input type="radio" name="sex" id="sex-w" value="1">女
+                        </label>
+                    </div>
+                    <span id="sexRemind" class="remind"></span>
+                </div>
+                <div class="form-group">
+                    <div class="item-title col-sm-2">
+                        <label for="nation">民族<i class="icon-asterisk"/></label>
+                    </div>
+
+                    <div class="col-md-6 col-sm-10">
+                        <select id="national" name="nation" class="form-control">
+                            <option value="">请选择</option>
+                        </select>
+                    </div>
+                    <span id="nationalRemind" class="remind"></span>
+                </div>
+                <div class="form-group">
+                    <div class="item-title col-sm-2">
+                        <label for="major">专业<i class="icon-asterisk"/></label>
+                    </div>
+
+                    <div class="col-md-6 col-sm-10">
+                        <input type="text" class="form-control" id="major" name="major" value="{{user.major}}" required>
+                    </div>
+                    <span id="majorRemind" class="remind"></span>
+                </div>
+                <div class="form-group">
+                    <div class="item-title col-sm-2">
+                        <label for="phoneNumber">手机号<i class="icon-asterisk"/></label>
+                    </div>
+
+                    <div class="col-md-6 col-sm-10">
+                        <input type="text" class="form-control" name="phoneNumber" id="phoneNumber" value="{{user.phoneNumber}}" required>
+                    </div>
+                    <span id="phoneRemind" class="remind"></span>
+                </div>
+                <div class="form-group">
+                    <div class="item-title col-sm-2">
+                        <label for="identityCard">身份证号</label>
+                    </div>
+
+                    <div class="col-md-6 col-sm-10">
+                        <input type="text" class="form-control" name="identityCard" id="identityCard" value="{{user.identityCard}}">
+                    </div>
+                    <span id="identityRemind" class="remind"></span>
+                </div>
+                <div class="form-group">
+                    <div class="item-title col-sm-2">
+                        <label for="email">邮箱<i class="icon-asterisk"/></label>
+                    </div>
+
+                    <div class="col-md-6 col-sm-10">
+                        <input type="text" class="form-control" name="email" id="email" value="{{user.email}}" required>
+                    </div>
+                    <span id="emailRemind" class="remind">请正确填写邮箱地址，以便收到诊断报告及系统公告</span>
+                </div>
+                <div class="form-group">
+                    <div class="col-sm-offset-4 col-sm-2">
+                        <button type="button" class="btn btn-block btn-primary" onclick="savePersonalInfo('save-info')">提交</button>
+                    </div>
+                </div>
+            </form>
+        </div>
+    </script>
+    
+    <script id="update-passwd-template" type="text/html">
+        <div id="personal-info-title">
+            请修改您的登录密码
+        </div>
+        <div id="personal-info-body">
+            <form class="form-horizontal">
+                <div class="form-group">
+                    <div class="item-title col-sm-2">
+                        <label for="old-passwd">原密码<i class="icon-asterisk"/></label>
+                    </div>
+
+                    <div class="col-md-6 col-sm-10">
+                        <input type="password" class="form-control" id="old-passwd" required>
+                    </div>
+                    <span id="oldRemind" class="remind"></span>
+                </div>
+                <div class="form-group">
+                    <div class="item-title col-sm-2">
+                        <label for="new-passwd">新密码<i class="icon-asterisk"/></label>
+                    </div>
+
+                    <div class="col-md-6 col-sm-10">
+                        <input type="password" class="form-control" id="new-passwd" required>
+                    </div>
+                    <span id="newRemind" class="remind">密码应为6至16位，同时包含数字和字母</span>
+                </div>
+                <div class="form-group">
+                    <div class="item-title col-sm-2">
+                        <label for="confirm-passwd">确认密码<i class="icon-asterisk"/></label>
+                    </div>
+
+                    <div class="col-md-6 col-sm-10">
+                        <input type="password" class="form-control" id="confirm-passwd" required>
+                    </div>
+                    <span id="confirmRemind" class="remind"></span>
+                </div>
+                <div class="btn-group col-sm-offset-3">
+                    <button type="button" class="btn btn-primary" style="margin-right: 50px; margin-left: 25px;"
+                        onclick="return location.href = 'user-examlist.html';">跳过</button>
+                    <button type="button" class="btn btn-primary" onclick="savePersonalInfo('save-passwd')">保存</button>
+                </div>
+            </form>
+        </div>
+    </script>
+    
+</body>
+</html>

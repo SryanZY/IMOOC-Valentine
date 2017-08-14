@@ -1,0 +1,194 @@
+/* 高诊css*/
+#header {
+  width: 100%;
+  min-height: 40px;
+}
+#main {
+  margin-top: 50px;
+}
+
+.item-answer{
+  border: none;
+  border-bottom: 1px solid green;
+  width: 100px;
+}
+.kuang {
+  opacity: 0.2;
+  filter: alpha(opacity = 2);
+  border: 1px solid green;
+  padding: 1px;
+}
+
+.text-vocab {
+    color: #100101;
+    font-size: 18px;
+}
+
+.kuang-sel{
+  opacity: 0.9;
+  color: darkred;
+  background-color: #e8f5e9 ;
+  border: 1px solid #d9534f;
+}
+
+.countdown{
+  font-size: 40px;
+  color: #1c1c1c;
+  border: 1px solid brown;
+}
+/***考试界面样式**/
+.task-instruction{
+  display: block;
+  width: 100%;
+  padding: 0;
+  margin-bottom: 20px;
+  font-size: 18px;
+  line-height: inherit;
+  color: #333;
+  border: 0;
+  border-bottom: 1px solid #e5e5e5;
+}
+
+.task-body{
+  margin: 0px;
+  padding: 20px;
+  border: 1px solid forestgreen;
+}
+
+.left-content{
+  border-right: 5px solid green;
+}
+
+.right-content{
+
+}
+#task-text > select {
+    border: none;
+    border-bottom: 1px solid #000000;
+    -webkit-box-shadow: none;
+    -moz-box-shadow: none;
+    box-shadow: none;
+    -webkit-border-radius: 0;
+    -moz-border-radius: 0;
+    border-radius: 0;
+}
+
+textarea:focus,
+select:focus,
+input[type="text"]:focus,
+input[type="password"]:focus,
+input[type="number"]:focus {
+    -webkit-box-shadow: none;
+    -moz-box-shadow: none;
+    box-shadow: none;
+}
+
+input[type="radio"] {
+    width: 18px;
+    height: 18px;
+}
+
+select {
+    padding-left: 2px;
+    padding-right: 2px;
+    width: auto;
+}
+/*** 考试界面样式 ***/
+
+.footer-div{
+  height: 34px;
+}
+
+/* 为可拖动的条目应用可移动光标类型 */
+.sortableList > .list-group-item {cursor: move}
+
+/* 为正在被拖动的条目应用半透明外观 */
+.sortableList > .list-group-item.dragging {
+    visibility: visible;
+    opacity: .3;
+}
+
+
+a.gou {
+  display: inline-block;
+  width: 20px;
+  height: 5px;
+  background: gray;
+  line-height: 0;
+  font-size: 0;
+  vertical-align: middle;
+  -webkit-transform: rotate(45deg);
+}
+
+a.gou:after {
+  content: '/';
+  display: block;
+  width: 20px;
+  height: 5px;
+  background: gray;
+  -webkit-transform: rotate(-90deg);
+}
+
+a.cha {
+  display: inline-block;
+  width: 10px;
+  height: 5px;
+  background: gray;
+  line-height: 0;
+  font-size: 0;
+  vertical-align: middle;
+  -webkit-transform: rotate(45deg);
+}
+
+a.cha:after {
+  content: '/';
+  display: block;
+  width: 20px;
+  height: 5px;
+  background: gray;
+  -webkit-transform: rotate(-90deg) translateY(-50%) translateX(50%);
+}
+.goback {
+    color: #000;
+    font-weight: 700;
+    height: 24px;
+    background: url(../image/goback.png) no-repeat left center;
+    padding-left: 26px;
+    line-height: 32px;
+    margin-right: 20px;
+    margin-left:10px;
+    display: inline-block;
+    float: left;
+}
+div.rectangle-mini{
+    border: 1px solid #449d48;
+    border-radius: 8px;
+    text-align: center;
+    width: 100px;
+    line-height: 20px;
+    margin-bottom: 5px;
+    margin: 3px;
+}
+div.rectangle-mini span,span.remove{
+    border: 1px solid #449d48;
+    border-radius: 6px;
+    float: right;
+    padding-left: 5px;
+    padding-right: 5px;
+    line-height: 18px;
+    color: #fff;
+    background-color: #4caf50;
+    cursor: pointer;
+}
+div.user-checked{
+    width: 80px;
+    display: inline-block;
+    padding: 1px 5px;
+    line-height: 1.5;
+    font-size: 12px;
+    font-weight: 400;
+    text-align: left;
+}
+.card:HOVER{
+    background: rgba(245, 245, 245, 0.8);
+}

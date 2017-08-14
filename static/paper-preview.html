@@ -1,0 +1,414 @@
+<!DOCTYPE html>
+<html lang="zh-cn">
+<head>
+<meta charset="utf-8">
+<meta http-equiv="X-UA-Compatible" content="IE=edge">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>试卷预览</title>
+<!-- css文件 放头部-->
+<link rel="stylesheet" type="text/css" href="css/style.css" />
+<link rel="stylesheet" type="text/css" href="lib/jplayer/jplayer.blue.monday.css"/>
+<!-- 引入共有的css -->
+<script src="js/style.js"></script>
+</head>
+<body style="padding:5px 30px;">
+    <div class="container-fluid" style="overflow-y: hidden;">
+        <!-- 试卷正文-->
+        <h1 id="paperName" class="text-center"></h1>
+        <div id="paper-part" class="row"></div>
+    </div>
+    <div id="footer" class="text-center"></div>
+
+    <!-- js文件放底部 -->
+    <!-- 共有的js引用commos.js -->
+    <script src="js/common.js"></script>
+    <!--  各个页面单独用的js 各自引入-->
+    <script src="lib/jplayer/jquery.jplayer.min.js"></script>
+    <script src="lib/sortable/zui.sortable.min.js"></script>
+    
+<script id="task-tpl" type="text/html">
+<div style="border:1px solid gray;margin:5px;">
+    {{if flag === 'p'}}
+    <div class="btn-group pull-right hidden">
+        <button class="btn btn-sm btn-primary"><i class="icon icon-long-arrow-down"></i></button>
+        <button class="btn btn-sm btn-primary"><i class="icon icon-long-arrow-up"></i></button>
+        <button class="btn btn-sm btn-danger"><i class="icon icon-trash"></i></button>
+    </div>
+    {{/if}}
+    <div class="task-instruction">{{task.instruction}}</div>
+    <div class="with-padding scrollbar-hover" style=" overflow: auto;">
+        <h3>{{task.taskName}}</h3>
+        {{if task.medias}}
+             <audio controls="controls">
+                 <source src="{{task.medias}}" type="audio/mp3"/>
+                 <source src="{{task.medias}}" type="audio/ogg"/>
+                 <source src="{{task.medias}}" type="audio/wav"/>
+                 Your browser does not support this audio format.
+             </audio>
+        <div>&nbsp;</div>
+        {{/if}}
+        <div id="task-text">{{#task.textContent}}</div>
+        {{ if task.skill != 'S1'}}
+        {{/if}}
+        {{each task.itemList as item i}}
+            {{include 'item-tpl' item}}
+        {{/each}}
+    </div>
+</div>
+</script>
+<script id="item-tpl" type="text/html">
+    {{if method == "saq"}}
+        {{include 'saq-tpl' item}}
+    {{/if}}
+    {{if method == "writing"}}
+        {{include 'writing-tpl' item}}
+    {{/if}}
+    {{if method == "mcq"}}
+        {{include 'mcq-tpl' item}}
+    {{/if}}
+    {{if method == "mmcq"}}
+        {{include 'mmcq-tpl' item}}
+    {{/if}}
+    {{if method == "mm"}}
+        {{include 'mm-tpl' item}}
+    {{/if}}
+    {{if method == "sequencing"}}
+        {{include 'sequencing-tpl' item}}
+    {{/if}}
+
+</script>
+<script id="saq-tpl" type="text/html">
+    <div>
+        <!--题干-->
+        <div class="stem"><span class="label label-badge label-primary">{{index}}</span> {{#getStem(itemStem)}}</div>
+        <!-- <textarea name="{{itemId}}" rows="3" autocomplete="off" autocorrect="off" autocapitalize="off"
+                  spellcheck="false"></textarea>-->
+    </div>
+</script>
+<script id="writing-tpl" type="text/html">
+    <div class="item-container">
+        <!--题干-->
+        <div class="stem"><span class="label label-badge label-primary">{{index}}</span> {{#getStem(itemStem)}}</div>
+        <textarea rows="80" name="{{itemId}}" autocomplete="off" autocorrect="off" autocapitalize="off"
+                  spellcheck="false"></textarea>
+    </div>
+</script>
+<script id="mcq-tpl" type="text/html">
+    <div id="item_{{itemId}}" class="item_box">
+        <!--题干-->
+        <div class="stem"><span class="label label-badge label-primary">{{index}}</span> {{#getStem(itemStem)}}</div>
+        <!--选项-->
+        {{each itemOption as option index}}
+        <div class="radio">
+            <label>
+                <input type="radio" name="{{itemId}}" value="{{index}}"> {{getItemSN(index+65)}}. {{clearHtml(option)}}
+            </label>
+        </div>
+        {{/each}}
+    </div>
+</script>
+<script id="mmcq-tpl" type="text/html">
+    <div id="item_{{itemId}}" class="item_box">
+        <!--题干-->
+        <div class="stem"><span class="label label-badge label-primary">{{index}}</span> {{#getStem(itemStem)}}</div>
+        <!--选项-->
+        {{each itemOption as option index}}
+        <div class="checkbox">
+            <label>
+                <input type="checkbox" name="{{itemId}}" value="{{index}}"> {{#getItemSN(index+65)}}. {{#option}}
+            </label>
+        </div>
+        {{/each}}
+    </div>
+</script>
+<script id="mm-tpl" type="text/html">
+    <div id="item_{{itemId}}" class="item_box">
+        <div class="stem"><span class="label label-badge label-primary">{{index}}</span></div>
+        <table width="100%">
+            <tr>
+                <td width="50%" style="padding-right:10px;">
+                    <!--题干-->
+                    {{each itemStem as stem}}
+                    <div class="input-group">
+                        <span class="input-group-addon" for="{{itemId}}">{{#stem}}</span>
+                        <select class="form-control" name="{{itemId}}">
+                            <option value=""></option>
+                            {{each itemOption as option i}}
+                            <option value="{{i}}">{{getItemSN(i+65)}}</option>
+                            {{/each}}
+                        </select>
+                    </div>
+                    {{/each}}
+                </td>
+                <td width="50%" style="padding-left:10px;">
+                    <!--选项-->
+                    {{each itemOption as option i}}
+                    <div>
+                        <label>
+                            <span> {{getItemSN(i+65)}}. {{#option}}</span>
+                        </label>
+                    </div>
+                    {{/each}}
+                </td>
+            </tr>
+        </table>
+    </div>
+</script>
+<script id="sequencing-tpl" type="text/html">
+    <div class="item_box">
+        <span class="label label-badge label-primary">{{index}}</span>
+        <div class="list-group sortableList" id="{{itemId}}">
+            {{each itemStem as stem i}}
+            <div class="list-group-item" order="{{i}}"><i class="icon-move"></i>{{#stem}}</div>
+            {{/each}}
+        </div>
+    </div>
+</script>
+<script type="text/javascript">
+    var id = $.getUrlParam('id');
+    var f= $.getUrlParam('f');
+    $(function(){
+        $('#header').load('header.html');
+        $('#footer').load('footer.html');
+        if(f === 'p'){ //试卷预览
+            getPaper(id);
+        }else if (f=== 't') {
+            //试题预览
+            getTask(id);
+        }
+        
+        // 初始化时传入选项参数
+        $('.sortableList').sortable();
+    });
+    
+    template.helper('getStem', function (stemArr) {
+        if (stemArr.length === 1) {
+            var arr = stemArr[0];
+            arr = arr.replace(/\{\{[0-9]+\}\}/g, '<input type="text" class="item-answer" name="" autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false">');
+            return arr;
+        }
+    });
+    template.helper('getItemSN', function (index) {
+        return String.fromCharCode(index);
+    });
+    
+    template.helper('clearHtml', function (html){
+        return clearHtml(html);
+    });
+    
+    function clearHtml(html) {
+        html = html.replace(/<[^>]+>/g, '');
+        html = html.replace('&nbsp;', '');
+        return html;
+    }
+    
+    function getPaper(id){
+        $.ajax({
+            type: 'GET',
+            url: serverUrl + 'papers/' + id,
+            async: true,
+            beforeSend: $.beforeSend,
+            success: function (data) {
+                if (data['status'] < 400) {
+                    var paper = data['data'];
+                    $('#paperName').html(paper.paperName);
+                    if(paper.taskList){
+                        var tasks = paper['taskList'];
+                        console.log(tasks);
+                        setItemIndex(tasks);
+                        for(var j=0;j< tasks.length;j++){
+                            
+                            dealCloze(tasks[j]);
+                            $('#paper-part').append(template('task-tpl', {task: tasks[j], flag: f}));
+                            // 处理 hollow挖空题型
+                            for (var i = 0; i < tasks[j]['itemList'].length; i++) {
+                                var item = tasks[j]['itemList'][i];
+                                switch (item['method']) {
+                                    case 'mm-hollow':
+                                        createItemMMH(item);
+                                        break;
+                                    case 'saq-hollow':
+                                        createItemSAQH(item);
+                                        break;
+                                    case 'formation-hollow':
+                                        createItemFormationH(item);
+                                        break;
+                                    case 'mcq-hollow':
+                                        createItemMCQH(item);
+                                        break;
+                                    default:
+                                        break;
+                                }
+                            }
+                        } 
+                    }
+                } else {
+                    new $.zui.Messager('获取试卷信息失败', zuiMessager.fail).show();
+                }
+            },
+            error: function (XMLHttpRequest, textStatus, errorThrown) {
+                gz.logger(textStatus);
+                gz.logger(errorThrown);
+            }
+        });
+    }
+    
+    function getTask(id) {
+        $.ajax({
+            type: "GET",
+            url: serverUrl+'tasks/'+id,
+            beforeSend: $.beforeSend,
+            success: function (data) {
+                if (data['status'] < 400) {
+                    var task = data['data'];
+                    $('#paper-part').append(template('task-tpl', {task: task, flag: f}));
+                    
+                    // 处理 hollow挖空题型
+                    for (var i = 0; i < task['itemList'].length; i++) {
+                        var item = task['itemList'][i];
+                        switch (item['method']) {
+                            case 'mm-hollow':
+                                createItemMMH(item);
+                                break;
+                            case 'saq-hollow':
+                                createItemSAQH(item);
+                                break;
+                            case 'formation-hollow':
+                                createItemFormationH(item);
+                                break;
+                            case 'mcq-hollow':
+                                createItemMCQH(item);
+                                break;
+                            default:
+                                break;
+                        }
+                    }
+                }else{
+                    new $.zui.Messager('获取试题信息失败', zuiMessager.fail).show();
+                }
+            },
+            error: function (XMLHttpRequest, textStatus, errorThrown) {
+                gz.logger(textStatus);
+                gz.logger(errorThrown);
+            }
+        });
+    }
+    
+    /**
+     * 设置题目编号
+     */
+    function setItemIndex(tasks) {
+        var index = 1;
+        for (var i = 0; i < tasks.length; i++) {
+            for (var j = 0; j < tasks[i]['itemList'].length; j++) {
+                var item = tasks[i]['itemList'][j];
+                item['index'] = index;
+                if (item['method'] === 'mm-hollow' || item['method'] === 'mm') {
+                    index += item['itemStem'].length;
+                } else {
+                    index++;
+                }
+            }
+        }
+    }
+    
+    /**
+     * 完形填空题
+     */
+    function createItemSAQH(item) {
+        
+        
+        /* var blankLen = $.trim($('#task-text a[href="' + item['itemId'] + '"]').html()).length * 14;
+        var html = '&nbsp;<span class="label label-badge label-primary">' + item['index'] + '</span>';
+        html += '<input type="text" class="item-answer" name="' + item['itemId'] + '" style="width:' + blankLen + 'px;" autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false">';
+        html += '&nbsp;';
+        $('#task-text a[href="' + item['itemId'] + '"]').replaceWith(html); */
+        
+        var itemstem = item['stem'];
+        console.log(itemstem);
+        var blankLen = 14;
+        var html = '&nbsp;<span class="label label-badge label-primary">' + item['index'] + '</span>';
+        html += '<input type="text" class="item-answer" name="' + item['itemId'] + '" style="width:' + blankLen + 'px;" autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false">';
+        html += '&nbsp;';
+        var taskText = $('#task-text').html();
+        taskText = taskText.replace(itemstem, html);
+        $('#task-text').html(taksText);
+    }
+
+    /**
+     * 有提示的完形填空题
+     */
+    function createItemFormationH(item) {
+        /* var blankLen = $.trim($('#task-text a[href="' + item['itemId'] + '"]').html()).length * 14;
+        var html = '&nbsp;<span class="label label-badge label-primary">' + item['index'] + '</span>';
+        html += '<input type="text" class="item-answer" name="' + item['itemId'] + '" style="width:' + blankLen + 'px;" autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false">';
+        html += '<span class="text-italic">(' + item['itemPrompt'] + ')</span>&nbsp;';
+        $('#task-text a[href="' + item['itemId'] + '"]').replaceWith(html); */
+        
+        var blankLen = 14;
+        var html = '&nbsp;<span class="label label-badge label-primary">' + item['index'] + '</span>';
+        html += '<input type="text" class="item-answer" name="' + item['itemId'] + '" style="width:' + blankLen + 'px;" autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false">';
+        html += '<span class="text-italic">(' + item['itemPrompt'] + ')</span>&nbsp;';
+        var taskText = $('#task-text').html();
+        taskText = taskText.replace(itemstem, html);
+        $('#task-text').html(taksText);
+    }
+
+    /**
+     * 完形
+     */
+    function createItemMCQH(item) {
+        var html = '&nbsp;<span class="label label-badge label-primary">' + item['index'] + '</span>'
+                + '<select name="' + item['itemId'] + '" class="item-answer" style="width:auto;">';
+        html += '<option value=""></option>';
+        for (var i = 0, max = item['itemOption'].length; i < max; i++) {
+            html += '<option value="' + i + '">' + String.fromCharCode(65 + i) + '. ' + clearHtml(item['itemOption'][i]) + '</option>';
+        }
+        html += '</select>&nbsp;';
+        //$('#task-text a[href="' + item['itemId'] + '"]').replaceWith(html);
+        
+        var taskText = $('#task-text').html();
+        taskText = taskText.replace(itemstem, html);
+        $('#task-text').html(taksText);
+    }
+
+    /**
+     * 共享选项的完形
+     */
+    function createItemMMH(item) {
+        for (var i = 0, max = item['itemStem'].length; i < max; i++) {
+            var html = '&nbsp;<span class="label label-badge label-primary">' + (item['index'] + i) + '</span>'
+                    + '<select name="' + item['itemId'] + '" id="' + item['itemStem'][i]
+                    + '" class="item-answer" style="width:auto;">';
+            html += '<option value=""></option>';
+            for (var j = 0, jmax = item['itemOption'].length; j < jmax; j++) {
+                html += '<option value="' + j + '">' + String.fromCharCode(65 + j) + '. ' + clearHtml(item['itemOption'][j]) + '</option>';
+            }
+            html += '</select>&nbsp;';
+            $('#' + item['itemStem'][i]).replaceWith(html);
+        }
+    }
+    
+    // TODO 处理挖空题题号对应关系
+    function dealCloze(task) {
+        var blankLen = 10;
+        var itemText = task['textContent'];
+        var arr = itemText.match(/\{\{[0-9]+\}\}/g) || [];
+        
+        for(var i=0;i< arr.length;i++){
+            var temp = arr[i];
+            itemText = itemText.replace(temp, '<input type="text" class="item-answer" name="" autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false">');
+        }
+        task['textContent'] = itemText;
+        
+        for (var j = 0; j < task['itemList'].length; j++) {
+            var item = task['itemList'][j];
+            //item['itemOption']
+            //item['itemStep']
+        }
+        var index = item['index'];
+    }
+    
+</script>
+</body>
+</html>

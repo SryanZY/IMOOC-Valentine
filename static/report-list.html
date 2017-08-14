@@ -1,0 +1,100 @@
+<!DOCTYPE html>
+<html lang="zh-cn">
+<head>
+<meta charset="utf-8">
+<meta http-equiv="X-UA-Compatible" content="IE=edge">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>报告管理</title>
+<!-- css文件 放头部-->
+<link rel="stylesheet" type="text/css" href="css/style.css" />
+
+<!-- 引入共有的css -->
+<script src="js/style.js"></script>
+</head>
+<body>
+    <div id="header"></div>
+    <div id="main">
+       <div class="container">
+           <div id="exams-search" class="row" style="margin-top: 20px;margin-bottom: 20px;">
+               <div class="col-sm-4">
+                    <div class="input-group">
+                         <span class="input-group-addon"><i class="icon icon-search"></i></span>
+                         <select id="s-year-select" name="" class="form-control"></select>
+                    </div>
+               </div>
+            </div>
+            <div class="row">
+               <div class="col-md-4">
+                    <div class="card panel panel-primary">
+                        <div class="panel-heading">
+                            <span class="panel-title"><i class="icon icon-flag"></i></span>
+                        </div>
+                        <div class="panel-body">
+                            <p>班级名称：2017bb</p>
+                            <p>考试技能：</p>
+                            <ul class="list-group">
+                              <li class="list-group-item"><a href="#">词汇量</a></li>
+                              <li class="list-group-item"><a href="javascript:showReport('c0d9c749-21bd-46f8-baca-f298206e8b96','S1');">听力</a></li>
+                              <li class="list-group-item"><a href="#">阅读</a></li>
+                              <li class="list-group-item"><a href="#">语言知识运用</a></li>
+                              <li class="list-group-item"><a href="#">写作</a></li>
+                              <li class="list-group-item"><a href="#">口语</a></li>
+                              <li class="list-group-item"><a href="#">语法</a></li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-4">
+                    <div class="card panel panel-primary">
+                        <div class="panel-heading">
+                            <span class="panel-title"><i class="icon icon-flag"></i></span>
+                        </div>
+                        <div class="panel-body">
+                            <p>班级名称：2017级阅读2017班</p>
+                            <p>考试技能：</p>
+                            <ul class="list-group">
+                              <li class="list-group-item"><a href="#">词汇量</a></li>
+                              <li class="list-group-item"><a href="javascript:showReport('c0d9c749-21bd-46f8-baca-f298206e8b96','S1');">听力</a></li>
+                              <li class="list-group-item"><a href="#">阅读</a></li>
+                              <li class="list-group-item"><a href="#">语言知识运用</a></li>
+                              <li class="list-group-item"><a href="#">写作</a></li>
+                              <li class="list-group-item"><a href="#">口语</a></li>
+                              <li class="list-group-item"><a href="#">语法</a></li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+            </div>
+       </div>
+    </div>
+    <div id="footer" class="text-center"></div>
+
+    <!-- js文件放底部 -->
+    <!-- 共有的js引用commos.js -->
+    <script src="js/common.js"></script>
+    <!--  各个页面单独用的js 各自引入-->
+    <script type="text/javascript">
+    $(function(){
+        $('#header').load('header.html');
+        $('#footer').load('footer.html');
+        
+        $('#s-year-select').getYearSelectList(true);
+        
+        $('#s-year-select').chosen({
+            allow_single_deselect:true,//设置为 true 时非必选的单选框会显示清除选中项图标
+            placeholder_text:'选择时间范围……',//单选框没有选中项时显示的占位文字
+            no_results_text: '没有找到',// 没有搜索到匹配项时显示的文字
+            disable_search_threshold: 10, //  少于 n 项时隐藏搜索框
+            search_contains: true  // 从任意位置开始检索
+        });
+    });
+    
+    function showReport(clazzId, skill){
+        var dateRange = $.trim($('#s-year-select option:selected').val());
+        var strs= new Array();
+        strs=dateRange.split("~");
+        window.open("report.html?clazzId="+clazzId+"&skill="+skill+"&beginDate="+strs[0]+"&endDate="+strs[1],"reportWindow");
+    }
+    </script>
+</body>
+</html>

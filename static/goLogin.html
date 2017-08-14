@@ -1,0 +1,36 @@
+<!DOCTYPE html>
+<html lang="zh-cn">
+<head>
+<meta charset="utf-8">
+<meta http-equiv="X-UA-Compatible" content="IE=edge">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title></title>
+<!-- css文件 放头部-->
+<link rel="stylesheet" type="text/css" href="css/style.css" />
+
+<!-- 引入共有的css -->
+<script src="js/style.js"></script>
+</head>
+<body>
+
+<div style="color: red;text-align: center;">
+    <h3>本次登录失效，请重新 <a href="user-login.html">登录</a>！</h3>
+    <h4>3秒后跳转到登录页面！</h4>
+</div>
+
+<!-- js文件放底部 -->
+<!-- 共有的js引用commos.js -->
+<script src="js/common.js"></script>
+<!--  各个页面单独用的js 各自引入-->
+<script type="text/javascript">
+$(function(){
+    document.title = gz.global.title;
+    setTimeout("goLoginPage()","3000");  //3000毫秒后执行goLogin()函数，只执行一次。
+});
+
+function goLoginPage(){
+    window.open("user-login.html", "_self");
+}
+</script>
+</body>
+</html>
